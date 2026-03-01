@@ -18,24 +18,40 @@ def initialize():
         db.refresh(bob) # Update the user (we use this to get the ID from the db)
         print("Database Initialized")
 
-@cli.command()
-def get_user(username:str):
-    with get_session() as db: # Get a connection to the database
-        user = db.exec(select(User).where(User.username == username)).first()
+@cli.command() # exercise 3: Modify all the existing cli commands and add help statements for all arguments and documentation for all the functions
+def get_user(username: str):
+    """
+    Retrieve a single user by their username.
+    """
+
+    with get_session() as db:
+
+        user = db.exec(
+            select(User).where(User.username == username)
+        ).first()
+
         if not user:
-            print(f'{username} not found!')
+            print(f"{username} not found!")
             return
+
         print(user)
 
-@cli.command()
+@cli.command() # exercise 3: Modify all the existing cli commands and add help statements for all arguments and documentation for all the functions
 def get_all_users():
+    """
+    Retrieve and display all users in the database.
+    """
+
     with get_session() as db:
-        all_users = db.exec(select(User)).all()
-        if not all_users:
+
+        users = db.exec(select(User)).all()
+
+        if not users:
             print("No users found")
-        else:
-            for user in all_users:
-                print(user)
+            return
+
+        for user in users:
+            print(user)
 
 @cli.command()
 def change_email(username: str, new_email:str):
@@ -74,6 +90,7 @@ def delete_user(username: str):
         db.commit()
         print(f'{username} deleted')
 
+# exercise 1: Create a cli command that allows you to find a user using a partial match of their email OR username.
 @cli.command()
 def search_user(query: str):
     """
@@ -96,6 +113,29 @@ def search_user(query: str):
             return
 
         for user in results:
+            print(user)
+
+# exercise 2: Create cli command that allows you to list the first N users of the database to be used by a paginated table. The command should accept 2 arguments limit and offset and return the appropriate result. limit should be defaulted to 10 and offset should be defaulted to 0
+@cli.command()
+def list_users(
+    limit: int = typer.Argument(10, help="Number of users to return"),
+    offset: int = typer.Argument(0, help="Number of users to skip")
+):
+    """
+    List users with pagination support.
+    """
+    with get_session() as db:
+        users = db.exec(
+            select(User)
+            .offset(offset)
+            .limit(limit)
+        ).all()
+
+        if not users:
+            print("No users found")
+            return
+
+        for user in users:
             print(user)
 
 if __name__ == "__main__":
