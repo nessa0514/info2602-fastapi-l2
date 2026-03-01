@@ -29,9 +29,13 @@ def get_user(username:str):
 
 @cli.command()
 def get_all_users():
-    # The code for task 5.2 goes here. Once implemented, remove the line below that says "pass"
-    pass
-
+    with get_session() as db:
+        all_users = db.exec(select(User)).all()
+        if not all_users:
+            print("No users found")
+        else:
+            for user in all_users:
+                print(user)
 
 @cli.command()
 def change_email(username: str, new_email:str):
