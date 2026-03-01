@@ -51,8 +51,17 @@ def change_email(username: str, new_email:str):
 
 @cli.command()
 def create_user(username: str, email:str, password: str):
-    # The code for task 7 goes here. Once implemented, remove the line below that says "pass"
-    pass
+    with get_session() as db: # Get a connection to the database
+        newuser = User(username, email, password)
+        try:
+            db.add(newuser)
+            db.commit()
+        except IntegrityError as e:
+            db.rollback() #let the database undo any previous steps of a transaction
+            #print(e.orig) #optionally print the error raised by the database
+            print("Username or email already taken!") #give the user a useful message
+        else:
+            print(newuser) # print the newly created user
 
 @cli.command()
 def delete_user(username: str):
