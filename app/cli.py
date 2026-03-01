@@ -39,8 +39,15 @@ def get_all_users():
 
 @cli.command()
 def change_email(username: str, new_email:str):
-    # The code for task 6 goes here. Once implemented, remove the line below that says "pass"
-    pass
+    with get_session() as db: # Get a connection to the database
+        user = db.exec(select(User).where(User.username == username)).first()
+        if not user:
+            print(f'{username} not found! Unable to update email.')
+            return
+        user.email = new_email
+        db.add(user)
+        db.commit()
+        print(f"Updated {user.username}'s email to {user.email}")
 
 @cli.command()
 def create_user(username: str, email:str, password: str):
